@@ -1,0 +1,17 @@
+[package]
+name = "primary-color"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "primary_image_color"
+crate-type = ["cdylib"]  
+
+[dependencies]
+anyhow = "1.0.86"
+image = "0.25.1"
+neon = "1"
+reqwest = { version = "0.12.5", features = ["blocking"] }
+color-thief = "0.2"
+regex = "1.10.5"
+base64 = "0.22.1"
