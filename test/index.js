@@ -1,4 +1,4 @@
-const addon = require('./build/Release/primary-color.node');
+const addon = require('../build/Release/primary-color.node');
 
 console.log(addon.hello());
 
