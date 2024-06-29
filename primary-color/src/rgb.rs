@@ -2,6 +2,14 @@
 use crate::image::get_image_buffer;
 use anyhow::Result;
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
+pub enum HexOrRgb {
+    Hex,
+    Rgb
+}
+
+
 #[derive(Debug, Clone, Copy)]
 struct RGB {
     r: u8,
@@ -31,12 +39,16 @@ impl RGB {
         }
     }
 
-    fn to_hex(&self) -> String {
+    fn to_hex_string(&self) -> String {
         format!("#{:02X}{:02X}{:02X}", self.r, self.g, self.b)
+    }
+
+    fn to_rgb_string(&self) -> String {
+        format!("{}, {}, {}", self.r, self.g, self.b)
     }
 }
 
-pub fn get_hex_code_from_img(img: image::DynamicImage) -> Result<String> {
+pub fn get_primary_color_from_img(img: image::DynamicImage, hex_or_rgb: HexOrRgb) -> Result<String> {
     let (buffer, color_type) = get_image_buffer(img);
 
     let colors = color_thief::get_palette(&buffer, color_type, 10, 10)?;
@@ -55,5 +67,14 @@ pub fn get_hex_code_from_img(img: image::DynamicImage) -> Result<String> {
 
     let avg_color = RGB::average_color(rbg_color);
 
-    Ok(avg_color.to_hex())
+    match hex_or_rgb {
+        HexOrRgb::Hex => {
+            return Ok(avg_color.to_hex_string())
+        }
+        HexOrRgb::Rgb => {
+            return Ok(avg_color.to_rgb_string())
+        }
+    }
+
+   
 }

@@ -21,3 +21,7 @@ pub fn validate_base64(base64: &str) -> Result<bool> {
     
 
 }
+
+pub fn check_if_is_array(input: &str) -> bool {
+    input.starts_with("[") && input.ends_with("]")
+}

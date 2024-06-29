@@ -2,7 +2,7 @@
 use color_thief::ColorFormat;
 use reqwest::blocking::Client;
 
-use crate::rgb::get_hex_code_from_img;
+use crate::rgb::{get_primary_color_from_img, HexOrRgb};
 use base64::{prelude::BASE64_STANDARD, Engine};
 
 use anyhow::Result;
@@ -19,22 +19,22 @@ pub fn get_image_buffer(img: image::DynamicImage) -> (Vec<u8>, ColorFormat) {
     }
 }
 
-pub fn image_primary_color_by_url(url: &str) -> Result<String> {
+pub fn image_primary_color_by_url(url: &str, hex_or_rgb: HexOrRgb) -> Result<String> {
     let image = image_url_to_image_bytes(url)?;
 
     let img = image::load_from_memory(&image)?;
 
-    let result = get_hex_code_from_img(img)?;
+    let result = get_primary_color_from_img(img, hex_or_rgb)?;
 
     Ok(result)
 }
 
-pub fn image_primary_color_by_base64(base64: &str) -> Result<String> {
+pub fn image_primary_color_by_base64(base64: &str, hex_or_rgb: HexOrRgb) -> Result<String> {
     let bytes = BASE64_STANDARD.decode(base64)?;
 
     let img = image::load_from_memory(&bytes)?;
 
-    let result = get_hex_code_from_img(img)?;
+    let result = get_primary_color_from_img(img, hex_or_rgb)?;
 
     Ok(result)
 }
