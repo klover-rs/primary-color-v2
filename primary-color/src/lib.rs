@@ -153,7 +153,7 @@ pub extern "C" fn primary_color_from_base64(base64: *const c_char, hex_or_rgb: H
                             Ok(s) => {
                                 valid_results.push(format!("[{}]", s));
                             },
-                            Err(e) => {
+                            Err(_) => {
                                 
                                 continue;
                             }
