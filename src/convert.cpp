@@ -135,22 +135,19 @@ std::vector<std::string> convert_to_string_array(const char* str) {
         return result;
     }
 
-
     std::string input_str(str);
 
-    while (!input_str.empty() && (input_str.front() == '[' || input_str.back() == ']')) {
-        if (input_str.front() == '[') {
-            input_str.erase(input_str.begin());
-        }
-        if (input_str.back() == ']') {
-            input_str.pop_back();
-        }
+    if (input_str.front() == '[' && input_str.back() == ']') {
+        input_str.erase(input_str.begin());
+        input_str.pop_back();
     }
 
     std::stringstream ss(input_str);
     std::string item;
 
-    while (std::getline(ss, item, ',')) {
+    while (std::getline(ss, item, ']')) {
+        item.erase(std::remove(item.begin(), item.end(), '['), item.end());
+        item.erase(std::remove(item.begin(), item.end(), ','), item.end());
         item.erase(item.begin(), std::find_if(item.begin(), item.end(), [](int ch) {
             return !std::isspace(ch);
         }));
@@ -158,9 +155,10 @@ std::vector<std::string> convert_to_string_array(const char* str) {
             return !std::isspace(ch);
         }).base(), item.end());
 
-        result.push_back(item);
+        if (!item.empty()) {
+            result.push_back(item);
+        }
     }
 
     return result;
-
 }
