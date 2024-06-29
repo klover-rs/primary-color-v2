@@ -115,8 +115,6 @@ pub extern "C" fn primary_color_from_image_url(image_url: *const c_char, hex_or_
             }
         }
     }
-
-    
 }
 
 #[no_mangle]
@@ -138,27 +136,73 @@ pub extern "C" fn primary_color_from_base64(base64: *const c_char, hex_or_rgb: H
         }
     };
 
-    match validate_base64(&base64) {
-        Ok(b) => {
-            if b {
-                match image::image_primary_color_by_base64(&base64, hex_or_rgb) {
-                    Ok(s) => {
-                        let color = CString::new(s).unwrap();
-                        return color.into_raw();
-                    },
-                    Err(e) => {
-                        eprintln!("error: {}", e);
-                        return ptr::null();
+    let is_array = check_if_is_array(&base64);
+    if is_array {
+        let base64_array = convert_to_vec(base64);
+
+        let mut valid_results = Vec::new();
+        let mut index = 0;
+
+        for base64 in base64_array {
+            match validate_base64(&base64) {
+                Ok(b) => {
+                    if b {
+                        match image::image_primary_color_by_url(&base64, hex_or_rgb) {
+                            Ok(s) => {
+                                valid_results.push(s);
+                            },
+                            Err(_) => {
+                                continue;
+                            }
+                        }
                     }
                 }
-            } else {
-                eprintln!("not a valid base64");
+                Err(_) => {
+                    continue;
+                }
+            }
+
+            index += 1;
+        }
+
+        if valid_results.is_empty() {
+            eprintln!("no valid results could be found");
+            return ptr::null();
+        }
+
+        let result_string = valid_results.join(", ");
+        let mut result = String::new();
+        result.push_str("[");
+        result.push_str(&result_string); 
+
+
+        result.push_str("]");
+
+        let colors = CString::new(result).unwrap();
+        return colors.into_raw();
+    } else {
+        match validate_base64(&base64) {
+            Ok(b) => {
+                if b {
+                    match image::image_primary_color_by_base64(&base64, hex_or_rgb) {
+                        Ok(s) => {
+                            let color = CString::new(s).unwrap();
+                            return color.into_raw();
+                        },
+                        Err(e) => {
+                            eprintln!("error: {}", e);
+                            return ptr::null();
+                        }
+                    }
+                } else {
+                    eprintln!("not a valid base64");
+                    return ptr::null();
+                }
+            }
+            Err(e) => {
+                eprintln!("Error: {}", e);
                 return ptr::null();
             }
         }
-        Err(e) => {
-            eprintln!("Error: {}", e);
-            return ptr::null();
-        }
-    }
+    }    
 }
