@@ -14,4 +14,15 @@ const char* jsStringToCString(napi_env env, napi_value jsValue);
 
 std::vector<std::string> convert_to_string_array(const char* str);
 
+napi_value CreateString(napi_env env, const std::string& str);
+
+struct Color {
+    int r;
+    int g;
+    int b;
+};
+
+Color parse_json_rgb(const std::string& jsonString);
+
+
 #endif // CONVERT_H

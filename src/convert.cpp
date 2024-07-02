@@ -162,3 +162,41 @@ std::vector<std::string> convert_to_string_array(const char* str) {
 
     return result;
 }
+
+napi_value CreateString(napi_env env, const std::string& str) {
+    napi_value result;
+    napi_status status = napi_create_string_utf8(env, str.c_str(), NAPI_AUTO_LENGTH, &result);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to create string");
+        return nullptr;
+    }
+    return result;
+}
+
+Color parse_json_rgb(const std::string& jsonString) {
+    Color color = {0,0,0};
+
+    size_t rPos = jsonString.find("\"r\":");
+    size_t gPos = jsonString.find("\"g\":");
+    size_t bPos = jsonString.find("\"b\":");
+
+    if (rPos != std::string::npos) {
+        size_t startPos = rPos + 4;
+        size_t endPos = jsonString.find_first_of(",}", startPos);
+        color.r = std::stoi(jsonString.substr(startPos, endPos - startPos));
+    }
+
+    if (gPos != std::string::npos) {
+        size_t startPos = gPos + 4;
+        size_t endPos = jsonString.find_first_of(",}", startPos);
+        color.g = std::stoi(jsonString.substr(startPos, endPos - startPos));
+    }
+
+    if (bPos != std::string::npos) {
+        size_t startPos = bPos + 4;
+        size_t endPos = jsonString.find_first_of(",}", startPos);
+        color.b = std::stoi(jsonString.substr(startPos, endPos - startPos));
+    }
+
+    return color;
+}
