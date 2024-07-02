@@ -3,8 +3,9 @@ use std::{ffi::CString, os::raw::c_char};
 use std::ptr;
 use std::ffi::CStr;
 use convert::convert_to_vec;
-use rgb::HexOrRgb;
+use rgb::{Color, HexOrRgb};
 use validate::{check_if_is_array, validate_base64, validate_url};
+use serde_json::json;
 
 mod validate;
 mod rgb;
@@ -56,7 +57,24 @@ pub extern "C" fn primary_color_from_image_url(image_url: *const c_char, hex_or_
                     if b {
                         match image::image_primary_color_by_url(&url, hex_or_rgb) {
                             Ok(s) => {
-                                valid_results.push(format!("[{}]", s));
+                                match s {
+                                    Color::Hex(hex) => {
+                                        valid_results.push(format!("[{}]", hex));
+                                    }
+                                    Color::Rgb(r, g, b) => {
+
+                                        let rgb_json = json!({
+                                            "r": r,
+                                            "g": g,
+                                            "b": b
+                                        });
+
+                                        valid_results.push(format!("[{}]", rgb_json.to_string()));
+
+                                    }
+                                }
+
+                                
                             },
                             Err(_) => {
                                 continue;
@@ -95,7 +113,23 @@ pub extern "C" fn primary_color_from_image_url(image_url: *const c_char, hex_or_
                 if b {
                     match image::image_primary_color_by_url(&url, hex_or_rgb) {
                         Ok(s) => {
-                            let color = CString::new(s).unwrap();
+                            let color = match s {
+                                Color::Hex(hex) => {
+                                    hex
+                                }
+                                Color::Rgb(r, g, b) => {
+
+                                    let rgb_json = json!({
+                                        "r": r,
+                                        "g": g,
+                                        "b": b
+                                    });
+
+                                    rgb_json.to_string()
+                                }
+                            };
+
+                            let color = CString::new(color).unwrap();
                             return color.into_raw();
                         },
                         Err(e) => {
@@ -151,7 +185,22 @@ pub extern "C" fn primary_color_from_base64(base64: *const c_char, hex_or_rgb: H
                     if b {
                         match image::image_primary_color_by_base64(&base64, hex_or_rgb) {
                             Ok(s) => {
-                                valid_results.push(format!("[{}]", s));
+                                match s {
+                                    Color::Hex(hex) => {
+                                        valid_results.push(format!("[{}]", hex));
+                                    }
+                                    Color::Rgb(r, g, b) => {
+
+                                        let rgb_json = json!({
+                                            "r": r,
+                                            "g": g,
+                                            "b": b
+                                        });
+
+                                        valid_results.push(format!("[{}]", rgb_json.to_string()));
+
+                                    }
+                                }
                             },
                             Err(_) => {
                                 
@@ -189,7 +238,23 @@ pub extern "C" fn primary_color_from_base64(base64: *const c_char, hex_or_rgb: H
                 if b {
                     match image::image_primary_color_by_base64(&base64, hex_or_rgb) {
                         Ok(s) => {
-                            let color = CString::new(s).unwrap();
+                            let color = match s {
+                                Color::Hex(hex) => {
+                                    hex
+                                }
+                                Color::Rgb(r, g, b) => {
+
+                                    let rgb_json = json!({
+                                        "r": r,
+                                        "g": g,
+                                        "b": b
+                                    });
+
+                                    rgb_json.to_string()
+                                }
+                            };
+
+                            let color = CString::new(color).unwrap();
                             return color.into_raw();
                         },
                         Err(e) => {

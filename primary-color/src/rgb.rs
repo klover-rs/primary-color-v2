@@ -1,6 +1,8 @@
 
 use crate::image::get_image_buffer;
 use anyhow::Result;
+use serde::{Deserialize, Serialize};
+
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
@@ -9,6 +11,11 @@ pub enum HexOrRgb {
     Rgb
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub enum Color {
+    Hex(String),
+    Rgb(u8, u8, u8),
+}
 
 #[derive(Debug, Clone, Copy)]
 struct RGB {
@@ -39,16 +46,17 @@ impl RGB {
         }
     }
 
-    fn to_hex_string(&self) -> String {
-        format!("#{:02X}{:02X}{:02X}", self.r, self.g, self.b)
+    fn to_hex(&self) -> Color {
+        let hex = format!("#{:02X}{:02X}{:02X}", self.r, self.g, self.b);
+        Color::Hex(hex)
     }
 
-    fn to_rgb_string(&self) -> String {
-        format!("{}, {}, {}", self.r, self.g, self.b)
+    fn to_rgb(&self) -> Color {
+        Color::Rgb(self.r, self.g, self.b)
     }
 }
 
-pub fn get_primary_color_from_img(img: image::DynamicImage, hex_or_rgb: HexOrRgb) -> Result<String> {
+pub fn get_primary_color_from_img(img: image::DynamicImage, hex_or_rgb: HexOrRgb) -> Result<Color> {
     let (buffer, color_type) = get_image_buffer(img);
 
     let colors = color_thief::get_palette(&buffer, color_type, 10, 10)?;
@@ -69,10 +77,10 @@ pub fn get_primary_color_from_img(img: image::DynamicImage, hex_or_rgb: HexOrRgb
 
     match hex_or_rgb {
         HexOrRgb::Hex => {
-            return Ok(avg_color.to_hex_string())
+            return Ok(avg_color.to_hex())
         }
         HexOrRgb::Rgb => {
-            return Ok(avg_color.to_rgb_string())
+            return Ok(avg_color.to_rgb())
         }
     }
 
