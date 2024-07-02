@@ -35,4 +35,5 @@ function get_image_from_fs(image_string) {
     } catch (e) {
         console.error(e);
     }
+
 }

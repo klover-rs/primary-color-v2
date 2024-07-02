@@ -8,11 +8,7 @@
 
 namespace demo {
 
-
 napi_value PrimaryColorByImageUrl(napi_env env, napi_callback_info info) {
-
-  test_fn(HexOrRgb::Hex);
-
   size_t argc = 2;
 
   napi_value argv[2];
@@ -44,6 +40,7 @@ napi_value PrimaryColorByImageUrl(napi_env env, napi_callback_info info) {
   const char* hex_code = primary_color_from_image_url(image_url, format);
 
   delete[] const_cast<char*>(image_url);
+  delete[] const_cast<char*>(format_type);
 
   if (hex_code == nullptr) {
     napi_throw_error(env, nullptr, "Oh uhm :/ it seems like we encountered an null pointer, please check the console for more details.");
@@ -56,13 +53,7 @@ napi_value PrimaryColorByImageUrl(napi_env env, napi_callback_info info) {
   bool is_array = check_if_is_array(hex_code);
 
   if (is_array) {
-    printf("is an array!\n");
-
-    std::vector<std::string> strings = convert_to_string_array(hex_code);
-
-    for (const auto& str : strings) {
-        std::cout << str << std::endl;
-    }
+    std::vector<std::string> colors = convert_to_string_array(hex_code);
 
     napi_value js_array;
     status = napi_create_array(env, &js_array);
@@ -72,29 +63,103 @@ napi_value PrimaryColorByImageUrl(napi_env env, napi_callback_info info) {
       return nullptr;
     }
 
-    for (size_t i = 0; i < strings.size(); ++i) {
-      napi_value js_string;
-      status = napi_create_string_utf8(env, strings[i].c_str(), NAPI_AUTO_LENGTH, &js_string);
-      if (status != napi_ok) {
-        napi_throw_error(env, nullptr, "Failed to create string for array element");
+    if (format == HexOrRgb::Rgb) {
+      for (size_t i = 0; i < colors.size(); ++i) {
+        napi_value jsObject;
+
+        Color color = parse_json_rgb(colors[i]);
+
+        status = napi_create_object(env, &jsObject);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "failed to create object");
+          
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
+
+        napi_value r, g, b;
+
+        status = napi_create_int32(env, color.r, &r);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "Failed to create property r");
+
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
+
+        status = napi_create_int32(env, color.g, &g);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "failed to create property g");
+
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
+
+        status = napi_create_int32(env, color.b, &b);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "failed to create property b");
+
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
+
+        status = napi_set_named_property(env, jsObject, "r", r);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "failed to set property r");
+
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
+
+        status = napi_set_named_property(env, jsObject, "g", g);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "Failed to set property g");
+
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
+
+        status = napi_set_named_property(env, jsObject, "b", b);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "failed to set property b");
+
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
+
+
+        status = napi_set_element(env, js_array, i, jsObject);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "failed to set array element");
         
-        delete[] const_cast<char*>(hex_code);
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
       }
-      status = napi_set_element(env, js_array, i, js_string);
-      if (status != napi_ok) {
-        napi_throw_error(env, nullptr, "failed to set array element");
+
+      result = js_array;
+    } else {
+      for (size_t i = 0; i < colors.size(); ++i) {
+        napi_value js_string;
+        status = napi_create_string_utf8(env, colors[i].c_str(), NAPI_AUTO_LENGTH, &js_string);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "Failed to create string for array element");
         
-        delete[] const_cast<char*>(hex_code);
-        return nullptr;
+          delete[] const_cast<char*>(hex_code);
+        }
+        status = napi_set_element(env, js_array, i, js_string);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "failed to set array element");
+        
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
       }
+
+      result = js_array;
     }
 
-    result = js_array;
-
-
   } else {
-    printf("is not an array!\n");
-
     status = napi_create_string_utf8(env, hex_code, NAPI_AUTO_LENGTH, &result);
     if (status != napi_ok) {
       napi_throw_error(env, nullptr, "Failed to create result string");
@@ -141,6 +206,7 @@ napi_value PrimaryColorByBase64(napi_env env, napi_callback_info info) {
   const char* hex_code = primary_color_from_base64(base64, format);
 
   delete[] const_cast<char*>(base64);
+  delete[] const_cast<char*>(format_type);
 
   if (hex_code == nullptr) {
     napi_throw_error(env, nullptr, "Oh uhm :/ it seems like we encountered an null pointer, please check the console for more details.");
@@ -154,10 +220,6 @@ napi_value PrimaryColorByBase64(napi_env env, napi_callback_info info) {
 
   if (is_array) {
     std::vector<std::string> colors = convert_to_string_array(hex_code);
-    
-    for (const auto& str : colors) {
-      std::cout << str << std::endl;
-    }
 
     napi_value js_array;
     status = napi_create_array(env, &js_array);
@@ -167,32 +229,111 @@ napi_value PrimaryColorByBase64(napi_env env, napi_callback_info info) {
       return nullptr; 
     }
 
-    for (size_t i = 0; i < colors.size(); ++i) {
-      napi_value js_string;
-      status = napi_create_string_utf8(env, colors[i].c_str(), NAPI_AUTO_LENGTH, &js_string);
-      if (status != napi_ok) {
-        napi_throw_error(env, nullptr, "Failed to create string for array element");
+    if (format == HexOrRgb::Rgb) {
+      for (size_t i = 0; i < colors.size(); ++i) {
+      
+        napi_value jsObject;
+
+        Color color = parse_json_rgb(colors[i]);
+    
+
+        status = napi_create_object(env, &jsObject); 
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "failed to create object");
+
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
+
+        napi_value r, g, b;
+
+        status = napi_create_int32(env, color.r, &r);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "Failed to create property r");
+
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
+
+        status = napi_create_int32(env, color.g, &g);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "failed to create property g");
+
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
+
+        status = napi_create_int32(env, color.b, &b);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "failed to create property b");
+
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
+
+        status = napi_set_named_property(env, jsObject, "r", r);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "failed to set property r");
+
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
+
+        status = napi_set_named_property(env, jsObject, "g", g);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "Failed to set property g");
+
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
+
+        status = napi_set_named_property(env, jsObject, "b", b);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "failed to set property b");
+
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
+
+
+        status = napi_set_element(env, js_array, i, jsObject);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "failed to set array element");
         
-        delete[] const_cast<char*>(hex_code);
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
       }
 
-       status = napi_set_element(env, js_array, i, js_string);
-      if (status != napi_ok) {
-        napi_throw_error(env, nullptr, "failed to set array element");
+      result = js_array;
+    } else {
+      for (size_t i = 0; i < colors.size(); ++i) {
+        napi_value js_string;
+        status = napi_create_string_utf8(env, colors[i].c_str(), NAPI_AUTO_LENGTH, &js_string);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "Failed to create string for array element");
         
-        delete[] const_cast<char*>(hex_code);
-        return nullptr;
+          delete[] const_cast<char*>(hex_code);
+        }
+        status = napi_set_element(env, js_array, i, js_string);
+        if (status != napi_ok) {
+          napi_throw_error(env, nullptr, "failed to set array element");
+        
+          delete[] const_cast<char*>(hex_code);
+          return nullptr;
+        }
       }
-    }
 
-    result = js_array;
-  } else {
-
-    status = napi_create_string_utf8(env, hex_code, NAPI_AUTO_LENGTH, &result);
-    if (status != napi_ok) {
-      napi_throw_error(env, nullptr, "Failed to create result string");
-      return nullptr;
+      result = js_array;
     }
+  }  else {
+
+      status = napi_create_string_utf8(env, hex_code, NAPI_AUTO_LENGTH, &result);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to create result string");
+        delete[] const_cast<char*>(hex_code);
+       return nullptr;
+      }
 
   }
 

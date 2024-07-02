@@ -174,8 +174,6 @@ pub extern "C" fn primary_color_from_base64(base64: *const c_char, hex_or_rgb: H
     if is_array {
         let base64_array = convert_to_vec(base64);
 
-        println!("base64 array length: {}", base64_array.len());
-
         let mut valid_results = Vec::new();
         let mut index = 0;
 
