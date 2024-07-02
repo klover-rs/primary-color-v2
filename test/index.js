@@ -1,7 +1,10 @@
-const addon = require('../build/Release/primary-color.node');
-const fs = require('fs');
+const path = require('path');
+const addon = require('../build/Release/primary-color');
+console.log(addon);
 
-console.log(addon.hello());
+
+
+const fs = require('fs');
 
 let result = addon.primaryColorByImageUrl(
     [
@@ -9,7 +12,9 @@ let result = addon.primaryColorByImageUrl(
         "344",
         "@3232",
         "https://i.pinimg.com/736x/30/0c/30/300c3027c4eec274de2a15bacfc7755f.jpg", "https://i.pinimg.com/736x/dd/11/77/dd1177ae42e5ffcc5572ab9d861b1ef2.jpg"
-    ]);
+    ],
+    'hex'
+);
 
 console.log(result);
 

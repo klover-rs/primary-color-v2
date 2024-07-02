@@ -13,21 +13,35 @@ napi_value PrimaryColorByImageUrl(napi_env env, napi_callback_info info) {
 
   test_fn(HexOrRgb::Hex);
 
-  size_t argc = 1;
+  size_t argc = 2;
 
-  napi_value argv[1];
+  napi_value argv[2];
   napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
-  if (argc < 1) {
-    napi_throw_error(env, nullptr, "Missing image URL argument");
+  if (argc < 2) {
+    napi_throw_error(env, nullptr, "Missing arguments: expected image URL and color format");
     return nullptr;
   }
 
   const char* image_url = jsStringToCString(env, argv[0]);
+  const char* format_type = jsStringToCString(env, argv[1]);
 
-  std::cout << image_url << std::endl;
+  HexOrRgb format;
 
-  const char* hex_code = primary_color_from_image_url(image_url, HexOrRgb::Hex);
+  if (strcmp(format_type, "hex") == 0) {
+      format = HexOrRgb::Hex;
+  }
+  else if (strcmp(format_type, "rgb") == 0) {
+      format = HexOrRgb::Rgb;
+  }
+  else {
+      delete[] const_cast<char*>(image_url);
+      delete[] const_cast<char*>(format_type);
+      napi_throw_error(env, nullptr, "Invalid format type. Use 'hex' or 'rgb'.");
+      return nullptr;
+  }
+
+  const char* hex_code = primary_color_from_image_url(image_url, format);
 
   delete[] const_cast<char*>(image_url);
 
