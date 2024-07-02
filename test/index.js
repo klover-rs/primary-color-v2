@@ -21,7 +21,7 @@ console.log(result);
 let base64_img = get_image_from_fs("images.jpeg");
 let base64_img1 = get_image_from_fs("c1ba9a1b65ba3e3f3cf0ca43cab00b1d.jpg")
 
-let result1 = addon.primaryColorByBase64([base64_img, base64_img1]);
+let result1 = addon.primaryColorByBase64([base64_img, base64_img1], "rgb");
 
 console.log(result1);
 
