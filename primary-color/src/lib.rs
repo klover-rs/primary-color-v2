@@ -56,7 +56,7 @@ pub extern "C" fn primary_color_from_image_url(image_url: *const c_char, hex_or_
                     if b {
                         match image::image_primary_color_by_url(&url, hex_or_rgb) {
                             Ok(s) => {
-                                valid_results.push(s);
+                                valid_results.push(format!("[{}]", s));
                             },
                             Err(_) => {
                                 continue;
