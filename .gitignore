@@ -1,3 +1,4 @@
 build
 primary-color/target
 lib
+node_modules
