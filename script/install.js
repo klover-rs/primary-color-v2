@@ -22,6 +22,12 @@ function determine_product() {
         case "x64-win32":
             product = "x86_64-pc-windows-msvc.zip";
             break;
+        case "arm64-darwin":
+            product = "x64_86-apple-darwin.a";
+            break;
+        case "x64-darwin":
+            product = "x64_86-apple-darwin.a";
+            break;
         default:
             product = "undefined";
             break;
@@ -173,6 +179,38 @@ function main() {
                     });
 
 
+                    break;
+                case "aarch64-apple-darwin.a":
+                    fs.renameSync(
+                      destPath,
+                      path.join(libPath, "libprimary_image_color.a"),
+                    );
+              
+                    buildNodeGypProject(projectPath, (err, result) => {
+                        if (err) {
+                            console.error("Build failed:", err);
+                            process.exit(0);
+                        } else {
+                            console.log("Build succeeded:", result);
+                            process.exit(0);
+                        }
+                    });
+                    break;
+                case "x86_64-apple-darwin.a":
+                    fs.renameSync(
+                        destPath,
+                        path.join(libPath, "libprimary_image_color.a"),
+                    );
+              
+                    buildNodeGypProject(projectPath, (err, result) => {
+                        if (err) {
+                            console.error("Build failed:", err);
+                            process.exit(0);
+                        } else {
+                            console.log("Build succeeded:", result);
+                            process.exit(0);
+                        }
+                    });
                     break;
                 default:
                     console.log("unsupported :(");
