@@ -137,15 +137,7 @@ function main() {
                     }
                 });
             } else {
-                fs.renameSync(destPath, path.join(libPath, 'libprimary_image_color.dylib'));
-    
-                buildNodeGypProject(projectPath, (err, result) => {
-                    if (err) {
-                        console.error('Build failed:', err);
-                    } else {
-                        console.log('Build succeeded:', result);
-                    }
-                });
+                console.log("unsupported :(");
             }
         }
     });
