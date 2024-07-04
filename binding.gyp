@@ -11,6 +11,9 @@
         }],
         ["OS=='win'", {
           "libraries": [ "<(module_root_dir)\\primary-color\\target\\release\\primary_image_color.dll.lib" ],
+        }],
+        ["OS=='mac'", {
+          "libraries": [ "<(module_root_dir)/lib/libprimary_image_color.a" ]
         }]
       ]
     }
