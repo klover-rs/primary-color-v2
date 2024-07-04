@@ -6,20 +6,24 @@ const path = require('path');
 const { exec } = require('child_process');
 
 const platform = process.platform;
-let arch = process.arch;
+const arch = process.arch;
 
 
 let product;
 
 function determine_product() {
+
+    console.log(arch);
+    console.log(platform);
     switch (`${arch}-${platform}`) {
-        case "arm64-":
-            arch = "aarch64";
+        case "arm64-linux":
+            product = "aarch64-unknown-linux-gnu.so";
             break;
         case "x64-win32":
             product = "x86_64-pc-windows-msvc.zip";
             break;
         default:
+            product = "undefined";
             break;
     }
 }
@@ -106,51 +110,78 @@ function main() {
 
     download(githuburl, destPath, (err) => {
         if (err) {
-            console.error(err);
+            console.error("AN ERROR:" + err);
         } else {
-            const build_dir = path.join(__dirname, "..", "build", "Release");
-    
+            
             console.log('Binary downloaded successfully.');
+
+            console.log("LIB PATH: " + libPath);
     
             if (!fs.existsSync(libPath)) {
                 fs.mkdirSync(libPath, { recursive: true });
             }
-    
-            if (product == "x86_64-pc-windows-msvc.zip") {
-                const zipFilePath = path.join(__dirname, product);
-                const outputDir = path.join(__dirname, 'output');
-    
-                extractZip(zipFilePath, outputDir, (err) => {
-                    if (err) {
-                        console.error('Extraction failed:', err);
-                    } else {
-                        console.log('Extraction succeeded!');
-                        if (!fs.existsSync(build_dir)) {
-                            fs.mkdirSync(build_dir, { recursive: true });
+
+            switch (product) {
+                case "x86_64-pc-windows-msvc.zip":
+                    const zipFilePath = path.join(__dirname, product);
+                    const outputDir = path.join(__dirname, 'output');
+                    const build_dir = path.join(__dirname, "..", "build", "Release");
+        
+                    extractZip(zipFilePath, outputDir, (err) => {
+                        if (err) {
+                            console.error('Extraction failed:', err);
+                        } else {
+                            console.log('Extraction succeeded!');
+                            if (!fs.existsSync(build_dir)) {
+                                fs.mkdirSync(build_dir, { recursive: true });
+                            }
+                            const output_folder = path.join(__dirname, "output"); 
+        
+                            fs.renameSync(path.join(output_folder, "primary_image_color.dll.lib"), path.join(libPath, "primary_image_color.dll.lib"));
+                            fs.renameSync(path.join(output_folder, "primary_image_color.dll"), path.join(build_dir, "primary_image_color.dll"));
+
+                            buildNodeGypProject(projectPath, (err, result) => {
+                                if (err) {
+                                    console.error('Build failed:', err);
+                                    fs.rmSync(outputDir, {recursive: true});
+                                    fs.rmSync(destPath, {recursive: true});
+                                    process.exit(0);
+                                } else {
+                                    console.log('Build succeeded:', result);
+                                    fs.rmSync(outputDir, {recursive: true});
+                                    fs.rmSync(destPath, {recursive: true});
+                                    process.exit(0);
+                                }
+                            });
+
+
                         }
-                        const output_folder = path.join(__dirname, "output"); 
-    
-                        fs.renameSync(path.join(output_folder, "primary_image_color.dll.lib"), path.join(libPath, "primary_image_color.dll.lib"));
-                        fs.renameSync(path.join(output_folder, "primary_image_color.dll"), path.join(build_dir, "primary_image_color.dll"));
-                        fs.rmSync(outputDir, {recursive: true});
-                        fs.rmSync(destPath, {recursive: true});
-                    }
-                });
-            } else {
-                console.log("unsupported :(");
+                    });
+                    break;
+                case "aarch64-unknown-linux-gnu.so":
+                    fs.renameSync(destPath, path.join(libPath, "libprimary_image_color.so"));
+                    buildNodeGypProject(projectPath, (err, result) => {
+                        if (err) {
+                            console.error('Build failed:', err);
+            
+                            process.exit(0);
+                        } else {
+                            console.log('Build succeeded:', result);
+                            
+                            process.exit(0);
+                        }
+                    });
+
+
+                    break;
+                default:
+                    console.log("unsupported :(");
             }
+    
         }
     });
 
-    buildNodeGypProject(projectPath, (err, result) => {
-        if (err) {
-            console.error('Build failed:', err);
-            process.exit(0);
-        } else {
-            console.log('Build succeeded:', result);
-            process.exit(0);
-        }
-    });
+    
 
    
     
