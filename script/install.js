@@ -17,7 +17,7 @@ function determine_product() {
     console.log(platform);
     switch (`${arch}-${platform}`) {
         case "arm64-linux":
-            product = "aarch64-unknown-linux-gnu.so";
+            product = "aarch64-unknown-linux-gnu.a";
             break;
         case "x64-win32":
             product = "x86_64-pc-windows-msvc.zip";
@@ -158,8 +158,8 @@ function main() {
                         }
                     });
                     break;
-                case "aarch64-unknown-linux-gnu.so":
-                    fs.renameSync(destPath, path.join(libPath, "libprimary_image_color.so"));
+                case "aarch64-unknown-linux-gnu.a":
+                    fs.renameSync(destPath, path.join(libPath, "libprimary_image_color.a"));
                     buildNodeGypProject(projectPath, (err, result) => {
                         if (err) {
                             console.error('Build failed:', err);

@@ -5,7 +5,7 @@ edition = "2021"
 
 [lib]
 name = "primary_image_color"
-crate-type = ["cdylib"]  
+crate-type = ["staticlib"]  
 
 [dependencies]
 anyhow = "1.0.86"
