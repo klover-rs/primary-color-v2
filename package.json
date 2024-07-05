@@ -6,8 +6,17 @@
     "install": "node script/install.js",
     "test": "node test/index.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "mari-rs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mari-rs/primary-color-v2.git"
+  },
+  "keywords": [
+    "image",
+    "color",
+    "primar_color"
+  ],
+  "license": "MIT",
   "description": "",
   "dependencies": {
     "adm-zip": "^0.5.14"
