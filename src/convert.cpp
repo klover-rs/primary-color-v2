@@ -200,3 +200,7 @@ Color parse_json_rgb(const std::string& jsonString) {
 
     return color;
 }
+
+std::string ConvertToString(const char* charValue) {
+    return std::string(charValue);
+}

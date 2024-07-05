@@ -24,5 +24,6 @@ struct Color {
 
 Color parse_json_rgb(const std::string& jsonString);
 
+std::string ConvertToString(const char* charValue);
 
 #endif // CONVERT_H

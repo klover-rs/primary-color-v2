@@ -160,11 +160,80 @@ napi_value PrimaryColorByImageUrl(napi_env env, napi_callback_info info) {
     }
 
   } else {
-    status = napi_create_string_utf8(env, hex_code, NAPI_AUTO_LENGTH, &result);
-    if (status != napi_ok) {
-      napi_throw_error(env, nullptr, "Failed to create result string");
-      delete[] const_cast<char*>(hex_code);
-      return nullptr;
+
+    if (format == HexOrRgb::Rgb) {
+      napi_value jsObject;
+
+      std::string color_str = ConvertToString(hex_code);
+
+      Color color = parse_json_rgb(color_str);
+
+      status = napi_create_object(env, &jsObject);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "failed to create object");
+
+        delete[] const_cast<char*>(hex_code);
+        return nullptr;
+      }
+
+      napi_value r, g, b;
+
+      status = napi_create_int32(env, color.r, &r);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to create property r");
+
+        delete[] const_cast<char*>(hex_code);
+        return nullptr;
+      }
+
+      status = napi_create_int32(env, color.g, &g);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "failed to create property g");
+
+        delete[] const_cast<char*>(hex_code);
+        return nullptr;
+      }
+
+      status = napi_create_int32(env, color.b, &b);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "failed to create property b");
+
+        delete[] const_cast<char*>(hex_code);
+        return nullptr;
+      }
+
+      status = napi_set_named_property(env, jsObject, "r", r);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "failed to set property r");
+
+        delete[] const_cast<char*>(hex_code);
+        return nullptr;
+      }
+
+      status = napi_set_named_property(env, jsObject, "g", g);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to set property g");
+
+        delete[] const_cast<char*>(hex_code);
+        return nullptr;
+      }
+
+      status = napi_set_named_property(env, jsObject, "b", b);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "failed to set property b");
+
+        delete[] const_cast<char*>(hex_code);
+        return nullptr;
+      }
+      result = jsObject;
+
+    } else {
+      status = napi_create_string_utf8(env, hex_code, NAPI_AUTO_LENGTH, &result);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to create result string");
+        delete[] const_cast<char*>(hex_code);
+        return nullptr;
+      }
     }
   }
 
@@ -326,14 +395,82 @@ napi_value PrimaryColorByBase64(napi_env env, napi_callback_info info) {
 
       result = js_array;
     }
-  }  else {
+  } else {
 
+    if (format == HexOrRgb::Rgb) {
+      napi_value jsObject;
+
+      std::string color_str = ConvertToString(hex_code);
+
+      Color color = parse_json_rgb(color_str);
+
+      status = napi_create_object(env, &jsObject);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "failed to create object");
+
+        delete[] const_cast<char*>(hex_code);
+        return nullptr;
+      }
+
+      napi_value r, g, b;
+
+      status = napi_create_int32(env, color.r, &r);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to create property r");
+
+        delete[] const_cast<char*>(hex_code);
+        return nullptr;
+      }
+
+      status = napi_create_int32(env, color.g, &g);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "failed to create property g");
+
+        delete[] const_cast<char*>(hex_code);
+        return nullptr;
+      }
+
+      status = napi_create_int32(env, color.b, &b);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "failed to create property b");
+
+        delete[] const_cast<char*>(hex_code);
+        return nullptr;
+      }
+
+      status = napi_set_named_property(env, jsObject, "r", r);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "failed to set property r");
+
+        delete[] const_cast<char*>(hex_code);
+        return nullptr;
+      }
+
+      status = napi_set_named_property(env, jsObject, "g", g);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to set property g");
+
+        delete[] const_cast<char*>(hex_code);
+        return nullptr;
+      }
+
+      status = napi_set_named_property(env, jsObject, "b", b);
+      if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "failed to set property b");
+
+        delete[] const_cast<char*>(hex_code);
+        return nullptr;
+      }
+      result = jsObject;
+
+    } else {
       status = napi_create_string_utf8(env, hex_code, NAPI_AUTO_LENGTH, &result);
       if (status != napi_ok) {
         napi_throw_error(env, nullptr, "Failed to create result string");
         delete[] const_cast<char*>(hex_code);
-       return nullptr;
+        return nullptr;
       }
+    }
 
   }
 
