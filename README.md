@@ -1,17 +1,20 @@
 # primary-color-v2
+This project is simply just used for getting the primary color of an image in nodejs. Please note this is a **Native Node Module**
 
-## How to build
+## How to build your Node Module
 
 ### prerequisites
 - C++ build tools for your platform (you have to anyways install them while you install rust or nodejs)
 - [nodejs](https://nodejs.org/en/download/package-manager)
-- [rust](https://www.rust-lang.org/tools/install)
+- [rust](https://www.rust-lang.org/tools/install) (only required for manual building)
 - [python](https://www.python.org/downloads/)
 - node-gyp (can be installed with `npm i -g node-gyp`)
 
 we have to methods for building, a python script (coming soon), or manual building
 
 ### Method 1. installer script
+
+just run `npm i` in the root dir of this project
 
 ### Method 2. Manual Building (assumes linux or macOS)
 
@@ -36,7 +39,7 @@ once you have completed the building, you need to move the "primary_image_color.
 
 ## Test it out!
 
-you can test it out with `node test/index.js`
+you can test it out with `npm test` in the root directory (make sure that you have built everything tho :D)
 
 ## how does it even work? 
 
