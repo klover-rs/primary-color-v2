@@ -5,7 +5,9 @@ edition = "2021"
 
 [lib]
 name = "primary_image_color"
-crate-type = ["staticlib"]  
+crate-type = ["staticlib"] # change to cdylib on windows
+
+
 
 [dependencies]
 anyhow = "1.0.86"
@@ -17,3 +19,6 @@ regex = "1.10.5"
 base64 = "0.22.1"
 serde = { version = "1.0.203", features = ["derive"] }
 serde_json = "1.0.120"
+crossbeam = "0.8.4"
+crossbeam-channel = "0.5.13"
+
