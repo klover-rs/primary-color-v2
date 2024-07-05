@@ -8,16 +8,17 @@ const { exec } = require('child_process');
 const platform = process.platform;
 const arch = process.arch;
 
-
 let product;
 
 function determine_product() {
-
     console.log(arch);
     console.log(platform);
     switch (`${arch}-${platform}`) {
         case "arm64-linux":
             product = "aarch64-unknown-linux-gnu.a";
+            break;
+        case "x64-linux":
+            product = "x86_64-unknown-linux-gnu.a";
             break;
         case "x64-win32":
             product = "x86_64-pc-windows-msvc.zip";
@@ -29,8 +30,8 @@ function determine_product() {
             product = "x64_86-apple-darwin.a";
             break;
         default:
-            product = "undefined";
-            break;
+            console.log("your platform is unsupported currently.");
+            process.exit(0);
     }
 }
 
@@ -119,10 +120,6 @@ function main() {
             console.error("AN ERROR:" + err);
         } else {
             
-            console.log('Binary downloaded successfully.');
-
-            console.log("LIB PATH: " + libPath);
-    
             if (!fs.existsSync(libPath)) {
                 fs.mkdirSync(libPath, { recursive: true });
             }
@@ -159,8 +156,6 @@ function main() {
                                     process.exit(0);
                                 }
                             });
-
-
                         }
                     });
                     break;
@@ -169,16 +164,24 @@ function main() {
                     buildNodeGypProject(projectPath, (err, result) => {
                         if (err) {
                             console.error('Build failed:', err);
-            
                             process.exit(0);
                         } else {
                             console.log('Build succeeded:', result);
-                            
                             process.exit(0);
                         }
                     });
-
-
+                    break;
+                case "x86_64-unknown-linux-gnu.a":
+                    fs.renameSync(destPath, path.join(libPath, "libprimary_image_color.a"));
+                    buildNodeGypProject(projectPath, (err, result) => {
+                        if (err) {
+                            console.error('Build failed:', err);
+                            process.exit(0);
+                        } else {
+                            console.log('Build succeeded:', result);  
+                            process.exit(0);
+                        }
+                    });
                     break;
                 case "aarch64-apple-darwin.a":
                     fs.renameSync(
@@ -212,17 +215,10 @@ function main() {
                         }
                     });
                     break;
-                default:
-                    console.log("unsupported :(");
             }
     
         }
-    });
-
-    
-
-   
-    
+    }); 
 }
 
 main();
