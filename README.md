@@ -11,12 +11,11 @@
 
 we have to methods for building, a python script (coming soon), or manual building
 
-### Method 1. The Python script
+### Method 1. installer script
 
+### Method 2. Manual Building (assumes linux or macOS)
 
-### Method 2. Manual Building 
-
-for this method we need some additional prerequisites which are optional tho, those will be installed automatically, if you run the python script for building
+for this method we need some additional prerequisites which are optional tho.
 
 - cbindgen (not required for manual building but can be useful);
 
@@ -27,8 +26,12 @@ this tutorial expects that you use a shell
 3. in the root directory of the project: `cd primary-color && cargo build --release`
 
 please note that the file name can be different on different OSes, on macos for example "libprimary_image_color.a" or on windows "libprimary_image_color.lib"
-4. `cd .. && mkdir lib && mv primary-color/target/release/libprimary_image_color.so lib` 
+4. `cd .. && mkdir lib && mv primary-color/target/release/libprimary_image_color.a lib`
 5. `node-gyp configure && node-gyp build`
+
+### Note for windows
+
+once you have completed the building, you need to move the "primary_image_color.dll" file from the `primary-color/target/release` folder into the `build/Release` folder
 
 
 ## Test it out!
@@ -63,3 +66,5 @@ if you want to process multiple images, no problem, just create an array in java
         "https://i.pinimg.com/736x/30/0c/30/300c3027c4eec274de2a15bacfc7755f.jpg", "https://i.pinimg.com/736x/dd/11/77/dd1177ae42e5ffcc5572ab9d861b1ef2.jpg"
     ]);
 ```
+
+more examples can be found in `test/index.js`
