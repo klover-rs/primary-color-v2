@@ -1,4 +1,6 @@
 
+use std::fmt::format;
+use std::sync::{Arc, Mutex};
 use std::{ffi::CString, os::raw::c_char};
 use std::ptr;
 use std::ffi::CStr;
@@ -48,59 +50,61 @@ pub extern "C" fn primary_color_from_image_url(image_url: *const c_char, hex_or_
     if is_array {
         let url_array = convert_to_vec(&url);
 
-        let mut valid_results = Vec::new();
-        let mut index = 0;
+        let valid_results = Arc::new(Mutex::new(Vec::new()));
+        let (sender, receiver) = crossbeam_channel::unbounded();
 
-        for url in url_array {
-            match validate_url(&url) {
-                Ok(b) => {
-                    if b {
-                        match image::image_primary_color_by_url(&url, hex_or_rgb) {
-                            Ok(s) => {
-                                match s {
-                                    Color::Hex(hex) => {
-                                        valid_results.push(format!("[{}]", hex));
+        crossbeam::scope(|scope| {
+            for url in url_array {
+                let sender = sender.clone();
+                let valid_results = Arc::clone(&valid_results); 
+                scope.spawn(move |_| {
+                    match validate_url(&url) {
+                        Ok(b) => {
+                            if b {
+                                match image::image_primary_color_by_url(&url, hex_or_rgb) {
+                                    Ok(s) => {
+                                        let result = match s {
+                                            Color::Hex(hex) => format!("[{}]", hex),
+                                            Color::Rgb(r, g, b) => {
+                                                let rgb_json = json!({
+                                                    "r": r,
+                                                    "g": g,
+                                                    "b": b
+                                                });
+                                                format!("[{}]", rgb_json.to_string())
+                                            }
+                                        };
+
+                                        let mut results = valid_results.lock().unwrap();
+                                        results.push(result);
+                                        let _ = sender.send(());
                                     }
-                                    Color::Rgb(r, g, b) => {
-
-                                        let rgb_json = json!({
-                                            "r": r,
-                                            "g": g,
-                                            "b": b
-                                        });
-
-                                        valid_results.push(format!("[{}]", rgb_json.to_string()));
-
-                                    }
+                                    Err(_) => {}
                                 }
-
-                                
-                            },
-                            Err(_) => {
-                                continue;
                             }
                         }
+                        Err(_) => {}
                     }
-                }
-                Err(_) => {
-                    continue;
-                }
+                });
+              
             }
+        }).unwrap();
 
-            index += 1;
-        }
-        
-        if valid_results.is_empty() {
+     
+        drop(sender);
+
+        for _ in receiver.iter() {}
+
+        let results = valid_results.lock().unwrap();
+        if results.is_empty() {
             eprintln!("no valid results could be found");
             return ptr::null();
         }
 
-        let result_string = valid_results.join(", ");
+        let result_string = results.join(", ");
         let mut result = String::new();
         result.push_str("[");
-        result.push_str(&result_string); 
-
-
+        result.push_str(&result_string);
         result.push_str("]");
 
         let colors = CString::new(result).unwrap();
@@ -174,58 +178,61 @@ pub extern "C" fn primary_color_from_base64(base64: *const c_char, hex_or_rgb: H
     if is_array {
         let base64_array = convert_to_vec(base64);
 
-        let mut valid_results = Vec::new();
-        let mut index = 0;
+        let valid_results = Arc::new(Mutex::new(Vec::new()));
+        let (sender, receiver) = crossbeam_channel::unbounded();
 
-        for base64 in base64_array {
-            match validate_base64(&base64) {
-                Ok(b) => {
-                    if b {
-                        match image::image_primary_color_by_base64(&base64, hex_or_rgb) {
-                            Ok(s) => {
-                                match s {
-                                    Color::Hex(hex) => {
-                                        valid_results.push(format!("[{}]", hex));
-                                    }
-                                    Color::Rgb(r, g, b) => {
+        crossbeam::scope(|scope| {
+            for base64 in base64_array {
+                let sender = sender.clone();
+                let valid_results = Arc::clone(&valid_results);
 
-                                        let rgb_json = json!({
-                                            "r": r,
-                                            "g": g,
-                                            "b": b
-                                        });
+                scope.spawn(move |_| {
+                    match validate_base64(&base64) {
+                        Ok(b) => {
+                            if b {
+                                match image::image_primary_color_by_base64(&base64, hex_or_rgb) {
+                                    Ok(s) => {
+                                        let result = match s {
+                                            Color::Hex(hex) => format!("[{}]", hex),
+                                            Color::Rgb(r, g, b) => {
+        
+                                                let rgb_json = json!({
+                                                    "r": r,
+                                                    "g": g,
+                                                    "b": b
+                                                });
+                                                format!("[{}]", rgb_json.to_string())
+                                            }
+                                        };
 
-                                        valid_results.push(format!("[{}]", rgb_json.to_string()));
-
-                                    }
+                                        let mut results = valid_results.lock().unwrap();
+                                        results.push(result);
+                                        let _ = sender.send(());
+                                    },
+                                    Err(_) => {}
                                 }
-                            },
-                            Err(_) => {
-                                
-                                continue;
                             }
                         }
+                        Err(_) => {}
                     }
-                }
-                Err(_) => {
-                    continue;
-                }
+                });
             }
+        }).unwrap();
 
-            index += 1;
-        }
+        drop(sender);
 
-        if valid_results.is_empty() {
+        for _ in receiver.iter() {}
+
+        let results = valid_results.lock().unwrap();
+        if results.is_empty() {
             eprintln!("no valid results could be found");
             return ptr::null();
         }
 
-        let result_string = valid_results.join(", ");
+        let result_string = results.join(", ");
         let mut result = String::new();
         result.push_str("[");
-        result.push_str(&result_string); 
-
-
+        result.push_str(&result_string);
         result.push_str("]");
 
         let colors = CString::new(result).unwrap();
