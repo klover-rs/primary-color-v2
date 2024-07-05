@@ -1,12 +1,12 @@
 const path = require('path');
-const addon = require('../build/Release/primary-color');
+const addon = require('../index');
 console.log(addon);
 
 
 
 const fs = require('fs');
 
-let result = addon.primaryColorByImageUrl(
+let result = addon.primaryImageColorFromUrl(
     [
         "https://cdn.discordapp.com/banners/774409449476980746/f67cd20df77e4c15de55a5da0c92bc4c.png?size=1024&format=webp&quality=lossless&width=0&height=256", // a link which doesnt work anymore
         "344", 
@@ -16,12 +16,19 @@ let result = addon.primaryColorByImageUrl(
     'hex'
 );
 
+let result_non_array = addon.primaryImageColorFromUrl("https://i.pinimg.com/736x/30/0c/30/300c3027c4eec274de2a15bacfc7755f.jpg", "rgb");
+
 console.log(result);
+
+console.log(result_non_array);
 
 let base64_img = get_image_from_fs("images.jpeg");
 let base64_img1 = get_image_from_fs("c1ba9a1b65ba3e3f3cf0ca43cab00b1d.jpg")
 
-let result1 = addon.primaryColorByBase64([base64_img, base64_img1], "rgb");
+let result1 = addon.primaryImageColorFromBase64([base64_img, base64_img1], "rgb");
+let result1_non_array = addon.primaryImageColorFromBase64(base64_img, "hex");
+
+console.log(result1_non_array);
 
 console.log(result1);
 
