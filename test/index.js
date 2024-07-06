@@ -1,5 +1,5 @@
 const path = require('path');
-const addon = require('../index');
+const addon = require('../dist/index');
 console.log(addon);
 
 
