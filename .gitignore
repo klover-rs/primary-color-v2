@@ -3,3 +3,5 @@ primary-color/target
 primary-color/Cargo.lock
 lib
 node_modules
+dist
+.vscode
